@@ -6,11 +6,15 @@ import logoImg from './assets/logo.png'; // Add your logo image as logo.png in t
 function App() {
   return (
     <div className="loading-screen">
-      <img 
-        src={rocketImg}
-        alt="Rocket" 
-        className="rocket" 
-      />
+      <div className="rocket-wrapper">
+        <img 
+          src={rocketImg}
+          alt="Rocket" 
+          className="rocket" 
+        />
+        <div className="fire"></div>
+        <div className="smoke-trail"></div>
+      </div>
       
       <div className="logo-container">
         {/* Replace the placeholder div with the actual logo image */}
