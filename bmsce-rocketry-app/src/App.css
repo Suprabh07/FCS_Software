@@ -3,7 +3,7 @@ body, html {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Disables scrolling */
+  overflow: hidden;
 }
 
 .loading-screen {
@@ -38,7 +38,7 @@ body, html {
 
 .fire {
   position: absolute;
-  bottom: -70px; /* Adjust slightly based on your image nozzle position */
+  bottom: -70px;
   width: 40px;
   height: 120px;
   background: linear-gradient(to bottom, #ffea00, #ff5e00, transparent);
@@ -46,10 +46,8 @@ body, html {
   filter: blur(4px);
   z-index: 1;
   animation: flicker 0.1s infinite alternate;
-  /* Since the rocket image is rotated -45deg, the exhaust needs to appear straight down 
-     relative to the rotated image or relative to the wrapper. */
   transform-origin: top;
-  margin-top: -60px; /* Overlap with rocket base */
+  margin-top: -60px;
 }
 
 @keyframes flicker {
@@ -59,7 +57,7 @@ body, html {
 
 .smoke-trail {
   position: absolute;
-  bottom: -300px; /* Trail length */
+  bottom: -300px; 
   width: 20px;
   height: 350px;
   background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.5), transparent);
