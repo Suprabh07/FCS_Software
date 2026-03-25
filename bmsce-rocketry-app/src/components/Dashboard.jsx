@@ -2,8 +2,9 @@ import React from 'react';
 import Rocket3DView from './Rocket3DView';
 import TelemetryGraphs from './TelemetryGraphs';
 import MapViewer from './MapViewer';
+import LeftPanel from './LeftPanel';
 
-const Dashboard = ({ telemetryData, telemetryHistory }) => {
+const Dashboard = ({ telemetryData, telemetryHistory, fullHistory }) => {
   return (
     <div style={{
       display: 'flex',
@@ -18,14 +19,13 @@ const Dashboard = ({ telemetryData, telemetryHistory }) => {
       {/* LEFT HALF */}
       <div style={{
         flex: 1,
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: '8px',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.2)' // Subtle darker panel
+        minWidth: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)', // Subtle darker panel
+        borderRadius: '8px',
+        padding: '10px'
       }}>
-        <h2 style={{ color: '#aaa' }}>Left Panel (Coming Soon)</h2>
+        <LeftPanel telemetryData={telemetryData} telemetryHistory={telemetryHistory} fullHistory={fullHistory} />
       </div>
 
       {/* RIGHT HALF */}
