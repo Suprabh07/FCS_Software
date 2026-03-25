@@ -11,6 +11,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
+// A custom rocket SVG icon encoded as a data URI so we don't need external image files
+// Updated to match the blue & white chevron rocket image with a taller correctly proportioned aspect ratio
+const rocketIcon = new L.Icon({
+  iconUrl: "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 128'%3E%3Cpath d='M 32 4 C 35 24, 38 36, 38 44 L 26 44 C 26 36, 29 24, 32 4 Z' fill='%23e2e8f0' /%3E%3Crect x='26' y='44' width='12' height='20' fill='%23e2e8f0' /%3E%3Crect x='26' y='64' width='12' height='48' fill='%232b6cb0' /%3E%3Cpath d='M 26 48 L 32 38 L 38 48 L 38 53 L 32 43 L 26 53 Z' fill='%232b6cb0' /%3E%3Cpath d='M 26 55 L 32 45 L 38 55 L 38 60 L 32 50 L 26 60 Z' fill='%232b6cb0' /%3E%3Cpath d='M 26 90 L 10 106 L 10 112 L 26 112 Z' fill='%232b6cb0' /%3E%3Cpath d='M 38 90 L 54 106 L 54 112 L 38 112 Z' fill='%232b6cb0' /%3E%3Crect x='30' y='90' width='4' height='22' fill='%231a365d' /%3E%3C/svg%3E",
+  iconSize: [48, 96],
+  iconAnchor: [24, 48],
+  popupAnchor: [0, -48],
+  shadowUrl: null // No shadow needed
+});
+
 // A small sub-component strictly to handle re-centering the map when GPS coords change
 function RecenterMap({ lat, lon }) {
   const map = useMap();
@@ -42,10 +52,10 @@ const MapViewer = ({ lat, lon }) => {
           // 3. Change the url below to: url="/bmsce_tiles/{z}/{x}/{y}.png"
           // =========================================================================
           
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" /* Remove this when you add your QGIS tiles */
+          url="/map_tiles/{z}/{x}/{y}.png" /* Loading from local map_tiles folder */
           attribution='&copy; OpenStreetMap contributors | QGIS Customized'
         />
-        <Marker position={[safeLat, safeLon]}>
+        <Marker position={[safeLat, safeLon]} icon={rocketIcon}>
           <Popup>Rocket Current Pos</Popup>
         </Marker>
         <RecenterMap lat={safeLat} lon={safeLon} />
