@@ -4,6 +4,27 @@ import rocketImg from './assets/rocket.png';
 import logoImg from './assets/logo.png';
 import Dashboard from './components/Dashboard';
 
+// Utility to calculate 2D distance between ground station and current lat/lon using Haversine
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return 0; // if no GPS
+  
+  const R = 6371e3; // Earth radius in metres
+  const phi1 = lat1 * Math.PI/180; // phi, lambda in radians
+  const phi2 = lat2 * Math.PI/180;
+  const deltaPhi = (lat2-lat1) * Math.PI/180;
+  const deltaLambda = (lon2-lon1) * Math.PI/180;
+
+  const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  const surfaceDistance = R * c; // in metres
+
+  // Return only the 2D surface (GPS) distance
+  return surfaceDistance;
+};
+
 function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [baudRate, setBaudRate] = useState("115200");
@@ -13,12 +34,19 @@ function App() {
     pitch: 0, yaw: 0, roll: 0,
     vx: 0, vy: 0, vz: 0, v: 0,
     ax: 0, ay: 0, az: 0, a: 0,
+    alt: 0, pressure: 101325, 
+    distance: 0,
+    t1: 25, t2: 25,
+    vbat: 12.4, currentData: 0,
     lat: 12.9410, // BMSCE Default coordinates
     lon: 77.5655
   });
 
   // State to hold history for the graphs
   const [telemetryHistory, setTelemetryHistory] = useState([]);
+  
+  // State to hold full trajectory for the Height vs Time graph
+  const [fullHistory, setFullHistory] = useState([]);
   
   // Generate some dummy data for visualization purposes
   useEffect(() => {
@@ -39,6 +67,19 @@ function App() {
       const vz = 50 + elapsedSec; // Realistic linear growth instead of massive numbers
       const v = Math.sqrt(vx*vx + vy*vy + vz*vz);
       
+      // Simulate trajectory (launching up and then gravity takes over)
+      const alt = Math.max(0, 50 * elapsedSec - 0.5 * 9.8 * elapsedSec * elapsedSec);
+
+      // Read ground station from env, otherwise default to BMSCE
+      const groundLat = parseFloat(import.meta.env.VITE_GROUND_STATION_LAT) || 12.9410;
+      const groundLon = parseFloat(import.meta.env.VITE_GROUND_STATION_LON) || 77.5655;
+      
+      // Simulate some slight movement in lat/lon
+      const simulatedLat = 12.9410 + (elapsedSec * 0.00001);
+      const simulatedLon = 77.5655 + (elapsedSec * 0.00001);
+
+      const calculatedDistance = calculateDistance(groundLat, groundLon, simulatedLat, simulatedLon);
+
       const newData = {
         time: elapsedSec, // Shows nicely on X-axis as seconds (1, 2, 3...)
         pitch: Math.sin(elapsedSec / 2) * 0.5,
@@ -51,14 +92,32 @@ function App() {
         ax: ax,
         ay: ay,
         az: az,
-        a: Math.sqrt(ax*ax + ay*ay + az*az)
+        a: Math.sqrt(ax*ax + ay*ay + az*az),
+        alt: alt,
+        pressure: 101325 - (alt * 12),
+        distance: calculatedDistance,
+        lat: simulatedLat,
+        lon: simulatedLon,
+        t1: 25 + (elapsedSec * 0.1),
+        t2: 24 + (elapsedSec * 0.15),
+        vbat: 12.4 - (elapsedSec * 0.001),
+        currentData: 2.1 + Math.sin(elapsedSec) * 0.5
       };
 
-      setTelemetryData(newData);
+      setTelemetryData(prev => ({...prev, ...newData}));
+      
       setTelemetryHistory(prev => {
         const newHistory = [...prev, newData];
         if (newHistory.length > 50) newHistory.shift(); // Keep last 50 points
         return newHistory;
+      });
+
+      setFullHistory(prev => {
+        // Sample every ~5th point (2Hz) to keep memory manageable for full trajectory
+        if (prev.length === 0 || elapsedSec - prev[prev.length - 1].time >= 0.5) {
+          return [...prev, newData];
+        }
+        return prev;
       });
     }, 100);
 
@@ -133,27 +192,56 @@ function App() {
                 // Assuming gyro is sent in degrees, converting to radians for 3D model
                 roll: (parseFloat(parts[7]) || 0) * (Math.PI / 180),
                 pitch: (parseFloat(parts[8]) || 0) * (Math.PI / 180),
-                yaw: (parseFloat(parts[9]) || 0) * (Math.PI / 180)
+                yaw: (parseFloat(parts[9]) || 0) * (Math.PI / 180),
+                alt: parseFloat(parts[10]) || 0,
+                pressure: parseFloat(parts[11]) || 0
               };
 
-              setTelemetryData(prev => ({ ...prev, ...newData }));
-              setTelemetryHistory(prev => {
-                const newHistory = [...prev, newData];
-                if (newHistory.length > 50) newHistory.shift(); 
-                return newHistory;
+              setTelemetryData(prev => {
+                const groundLat = parseFloat(import.meta.env.VITE_GROUND_STATION_LAT) || 12.9410;
+                const groundLon = parseFloat(import.meta.env.VITE_GROUND_STATION_LON) || 77.5655;
+                const dist = calculateDistance(groundLat, groundLon, prev.lat || groundLat, prev.lon || groundLon);
+                
+                const updatedData = { ...newData, distance: dist };
+                const combinedData = { ...prev, ...updatedData };
+
+                setTelemetryHistory(histPrev => {
+                  const newHistory = [...histPrev, combinedData];
+                  if (newHistory.length > 50) newHistory.shift(); 
+                  return newHistory;
+                });
+
+                setFullHistory(fullPrev => {
+                  if (fullPrev.length === 0 || elapsedSec - fullPrev[fullPrev.length - 1].time >= 0.5) {
+                    return [...fullPrev, combinedData];
+                  }
+                  return fullPrev;
+                });
+
+                return combinedData;
               });
             } else if (packetId === 2 && parts.length >= 7) {
               // Parse Set 2 data: "2,lat,lon,vbat,current,t1,t2"
-              setTelemetryData(prev => ({
-                ...prev,
-                lat: parseFloat(parts[1]) || prev.lat,
-                lon: parseFloat(parts[2]) || prev.lon,
-                // We'll capture battery and temp data too for when you're ready
-                vbat: parseFloat(parts[3]),
-                currentData: parseFloat(parts[4]),
-                t1: parseFloat(parts[5]),
-                t2: parseFloat(parts[6])
-              }));
+              setTelemetryData(prev => {
+                const newLat = parseFloat(parts[1]) || prev.lat;
+                const newLon = parseFloat(parts[2]) || prev.lon;
+                
+                const groundLat = parseFloat(import.meta.env.VITE_GROUND_STATION_LAT) || 12.9410;
+                const groundLon = parseFloat(import.meta.env.VITE_GROUND_STATION_LON) || 77.5655;
+                const dist = calculateDistance(groundLat, groundLon, newLat, newLon);
+
+                return {
+                  ...prev,
+                  lat: newLat,
+                  lon: newLon,
+                  // We'll capture battery and temp data too for when you're ready
+                  vbat: parseFloat(parts[3]),
+                  currentData: parseFloat(parts[4]),
+                  t1: parseFloat(parts[5]),
+                  t2: parseFloat(parts[6]),
+                  distance: dist
+                };
+              });
             }
           } catch (e) {
             console.error("Error parsing serial line:", e, line);
@@ -171,7 +259,7 @@ function App() {
   };
 
   if (isConnected) {
-    return <Dashboard telemetryData={telemetryData} telemetryHistory={telemetryHistory} />;
+    return <Dashboard telemetryData={telemetryData} telemetryHistory={telemetryHistory} fullHistory={fullHistory} />;
   }
 
   return (
