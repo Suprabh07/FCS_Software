@@ -168,7 +168,21 @@ function App() {
         for (let i = 0; i < lines.length - 1; i++) {
           const line = lines[i].trim();
           if (!line) continue;
-          
+
+          // Push raw data to memory & file
+          const currentTimestamp = new Date().toLocaleString();
+          const csvLine = `${currentTimestamp},${line}\n`;
+
+          // Send to local Vite backend to write to file
+          try {
+            fetch('/api/log', {
+              method: 'POST',
+              body: csvLine
+            }).catch(() => {});
+          } catch(e) {
+            console.error(e);
+          }
+
           try {
             // Expected format depends on packet. Example placeholder parsing:
             // "1,vx,vy,vz,ax,ay,az,roll,pitch,yaw,alt,pressure"
