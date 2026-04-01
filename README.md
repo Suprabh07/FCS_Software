@@ -21,8 +21,8 @@ A high-performance, offline-capable Ground Station dashboard built for the **BMS
 ## Installation & Setup
 
 1. **Install Dependencies**  
-   Open your terminal in the root of the project (\msce-rocketry-app\) and run:
-   \\\ash
+   Open your terminal in the root of the project (\bmsce-rocketry-app\) and run:
+   \\\bash
    npm install
    \\\
 
