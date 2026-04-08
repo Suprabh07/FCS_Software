@@ -33,7 +33,7 @@ A high-performance, offline-capable Ground Station dashboard built for the **BMS
 Open your terminal or command prompt and run the following commands:
 \\\ash
 # 1. Clone the repository (if you haven't already and have a remote URL)
-# git clone <your-repo-url>
+# git clone (https://github.com/Suprabh07/FCS_Software)
 
 # 2. Navigate to the App directory
 cd bmsce-rocketry-app
