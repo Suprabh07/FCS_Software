@@ -44,14 +44,14 @@ npm install
 Since launch sites often lack internet, the map uses cached offline tiles instead of live Google/OSM servers.
 1. Download the map tiles zip file from this specific Google Drive link:
    👉 **[Download Map Tiles](https://drive.google.com/file/d/1fl1dtvSjqZJmKBLjTjwtNxQKtdUCdCX2/view?usp=sharing)**
-2. Navigate to the \public\ folder inside the \bmsce-rocketry-app\ directory.
+2. Navigate to the \public\ folder inside the \bmsce-rocketry-app\ directory.
 3. Extract the downloaded zip directly into public.
 4. Ensure the folder structure is perfectly aligned like this:
-   \bmsce-rocketry-app/public/map_tiles/{z}/{x}/{y}.png\
+   \bmsce-rocketry-app/public/map_tiles/{z}/{x}/{y}.png\
 
 ### Step 3: Set Ground Station GPS Coordinates
 For the distance calculator to work, it needs to know where the antenna is located.
-1. In the \bmsce-rocketry-app\ folder, create a new file named \.env\.
+1. In the \bmsce-rocketry-app\ folder, create a new file named \.env\.
 2. Add your launchpad/ground station GPS coordinates:
 \\\env
 VITE_GROUND_STATION_LAT=12.9410
@@ -81,7 +81,7 @@ npm run dev
 4. If valid data is flowing, the dashboard will appear and graphs will animate immediately!
 
 **Where limits and logs are saved:**
-- **CSV Logs**: As soon as connection is established, all raw serial data is automatically logged into \bmsce-rocketry-app/public/flight_log.csv\ with exact PC timestamps.
+- **CSV Logs**: As soon as connection is established, all raw serial data is automatically logged into \bmsce-rocketry-app/public/flight_log.csv\ with exact PC timestamps.
 - **Flight Checkpoints**: Located next to the Height graph, these will automatically check off as the rocket meets specific acceleration/velocity parameters during flight.
 
 ---
@@ -102,8 +102,8 @@ The software expects the receiver to forward comma-separated string packets endi
 
 ## 🔬 Checkpoint Verification Logic
 The software dynamically reads physics data to trigger checks:
-1. **Motor Ignited**: Vertical Acceleration (\a\) spikes > 15 m/s².
-2. **Motor Burnout**: Sustained ignition drops to coast phase (\a\ < 5 m/s²).
-3. **Apogee Reached**: Vertical Velocity (\z\) drops below zero.
-4. **Recovery Triggered**: Post-apogee shock spike detected (\v\ > 10 m/s²).
-5. **Ground Reached**: Recovery is active and overall speed drops near zero (\\ < 1 m/s).
+1. **Motor Ignited**: Vertical Acceleration (\a\) spikes > 15 m/s².
+2. **Motor Burnout**: Sustained ignition drops to coast phase (\a\ < 5 m/s²).
+3. **Apogee Reached**: Vertical Velocity (\z\) drops below zero.
+4. **Recovery Triggered**: Post-apogee shock spike detected (\v\ > 10 m/s²).
+5. **Ground Reached**: Recovery is active and overall speed drops near zero (\v\ < 1 m/s).
