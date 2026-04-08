@@ -4,7 +4,7 @@ import TelemetryGraphs from './TelemetryGraphs';
 import MapViewer from './MapViewer';
 import LeftPanel from './LeftPanel';
 
-const Dashboard = ({ telemetryData, telemetryHistory, fullHistory }) => {
+const Dashboard = ({ telemetryData, telemetryHistory, fullHistory, flightState }) => {
   return (
     <div style={{
       display: 'flex',
@@ -25,7 +25,12 @@ const Dashboard = ({ telemetryData, telemetryHistory, fullHistory }) => {
         borderRadius: '8px',
         padding: '10px'
       }}>
-        <LeftPanel telemetryData={telemetryData} telemetryHistory={telemetryHistory} fullHistory={fullHistory} />
+        <LeftPanel 
+          telemetryData={telemetryData} 
+          telemetryHistory={telemetryHistory} 
+          fullHistory={fullHistory} 
+          flightState={flightState}
+        />
       </div>
 
       {/* RIGHT HALF */}

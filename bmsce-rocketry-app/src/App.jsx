@@ -48,6 +48,48 @@ function App() {
   // State to hold full trajectory for the Height vs Time graph
   const [fullHistory, setFullHistory] = useState([]);
   
+  // Flight state checkpoints
+  const [flightState, setFlightState] = useState({
+    motorIgnited: false,
+    motorBurnout: false,
+    apogeeReached: false,
+    recoveryTriggered: false,
+    groundReached: false
+  });
+
+  // Monitor telemetry to update flight checkpoints
+  useEffect(() => {
+    setFlightState(fs => {
+      const newState = { ...fs };
+      const { a, vz, v } = telemetryData;
+      
+      // Motor Ignited: a > 15 (acceleration spike)
+      if (!fs.motorIgnited && a > 15) newState.motorIgnited = true;
+      
+      // Motor Burnout: Ignited, but acceleration drops below 5 (coasting)
+      if (fs.motorIgnited && !fs.motorBurnout && a < 5) newState.motorBurnout = true;
+      
+      // Apogee Reached: Burnout, and vertical velocity becomes negative
+      if (fs.motorBurnout && !fs.apogeeReached && vz < 0) newState.apogeeReached = true;
+      
+      // Recovery System Triggered: Apogee reached, and a sudden acceleration spike (parachute opening shock > 10)
+      if (fs.apogeeReached && !fs.recoveryTriggered && a > 10) newState.recoveryTriggered = true;
+      
+      // Ground Reached: Recovery triggered, and total velocity is near zero (< 1 m/s)
+      if (fs.recoveryTriggered && !fs.groundReached && v < 1) newState.groundReached = true;
+      
+      // Return new state only if something changed
+      if (newState.motorIgnited !== fs.motorIgnited ||
+          newState.motorBurnout !== fs.motorBurnout ||
+          newState.apogeeReached !== fs.apogeeReached ||
+          newState.recoveryTriggered !== fs.recoveryTriggered ||
+          newState.groundReached !== fs.groundReached) {
+        return newState;
+      }
+      return fs;
+    });
+  }, [telemetryData]);
+
   // Generate some dummy data for visualization purposes
   useEffect(() => {
     if (isConnected) return; // Stop dummy data once connected
@@ -273,7 +315,12 @@ function App() {
   };
 
   if (isConnected) {
-    return <Dashboard telemetryData={telemetryData} telemetryHistory={telemetryHistory} fullHistory={fullHistory} />;
+    return <Dashboard 
+      telemetryData={telemetryData} 
+      telemetryHistory={telemetryHistory} 
+      fullHistory={fullHistory} 
+      flightState={flightState} 
+    />;
   }
 
   return (
