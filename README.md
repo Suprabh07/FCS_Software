@@ -31,13 +31,13 @@ A high-performance, offline-capable Ground Station dashboard built for the **BMS
 
 ### Step 1: Clone and Install
 Open your terminal or command prompt and run the following commands:
-1. Clone the repository (if you haven't already and have a remote URL)
+1. Clone the repository (if you haven't already and have a remote URL)     
 git clone https://github.com/Suprabh07/FCS_Software
 
-2. Navigate to the App directory
+2. Navigate to the App directory   
 cd bmsce-rocketry-app
 
-3. Install all necessary NPM packages
+3. Install all necessary NPM packages     
 npm install
 
 ### Step 2: Configure Offline Map Tiles (CRITICAL for No-Internet Launches)
